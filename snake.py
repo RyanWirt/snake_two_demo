@@ -19,13 +19,26 @@ RED = (200, 0, 0)
 GRAY = (40, 40, 40)
 YELLOW = (255, 220, 0)
 
+# Directions
+UP = (0, -1)
+DOWN = (0, 1)
+LEFT = (-1, 0)
+RIGHT = (1, 0)
+
 
 def random_food(snake_body):
     """Return a random (col, row) position not occupied by the snake."""
-    while True:
-        pos = (random.randint(0, COLS - 1), random.randint(0, ROWS - 1))
-        if pos not in snake_body:
-            return pos
+    occupied = set(snake_body)
+    empty = [(c, r) for c in range(COLS) for r in range(ROWS) if (c, r) not in occupied]
+    return random.choice(empty)
+
+
+def reset():
+    """Return fresh game state: (body, direction, food, score)."""
+    start = (COLS // 2, ROWS // 2)
+    body = [start, (start[0] - 1, start[1]), (start[0] - 2, start[1])]
+    food = random_food(body)
+    return body, RIGHT, food, 0
 
 
 def draw_grid(surface):
@@ -75,14 +88,6 @@ def main():
     font = pygame.font.SysFont("monospace", 36, bold=True)
     score_font = pygame.font.SysFont("monospace", 22)
 
-    def reset():
-        start = (COLS // 2, ROWS // 2)
-        body = [start, (start[0] - 1, start[1]), (start[0] - 2, start[1])]
-        direction = (1, 0)
-        food = random_food(body)
-        score = 0
-        return body, direction, food, score
-
     body, direction, food, score = reset()
     next_direction = direction
     game_over = False
@@ -111,14 +116,14 @@ def main():
                     paused = not paused
 
                 if not paused:
-                    if event.key in (pygame.K_UP, pygame.K_w) and direction != (0, 1):
-                        next_direction = (0, -1)
-                    elif event.key in (pygame.K_DOWN, pygame.K_s) and direction != (0, -1):
-                        next_direction = (0, 1)
-                    elif event.key in (pygame.K_LEFT, pygame.K_a) and direction != (1, 0):
-                        next_direction = (-1, 0)
-                    elif event.key in (pygame.K_RIGHT, pygame.K_d) and direction != (-1, 0):
-                        next_direction = (1, 0)
+                    if event.key in (pygame.K_UP, pygame.K_w) and direction != DOWN:
+                        next_direction = UP
+                    elif event.key in (pygame.K_DOWN, pygame.K_s) and direction != UP:
+                        next_direction = DOWN
+                    elif event.key in (pygame.K_LEFT, pygame.K_a) and direction != RIGHT:
+                        next_direction = LEFT
+                    elif event.key in (pygame.K_RIGHT, pygame.K_d) and direction != LEFT:
+                        next_direction = RIGHT
 
         if not game_over and not paused:
             direction = next_direction
